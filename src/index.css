@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Dark mode */
+body.dark-mode {
+  background-color: #111827;
+  color: #f9fafb;
+}
+
+body.dark-mode .bg-white {
+  background-color: #1f2937 !important;
+}
+
+body.dark-mode .bg-gray-50 {
+  background-color: #111827 !important;
+}
+
+body.dark-mode .bg-gray-100 {
+  background-color: #1f2937 !important;
+}
+
+body.dark-mode .text-gray-900 {
+  color: #f9fafb !important;
+}
+
+body.dark-mode .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+body.dark-mode .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+body.dark-mode .text-gray-500 {
+  color: #9ca3af !important;
+}
+
+body.dark-mode .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+body.dark-mode .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+body.dark-mode .border-gray-100 {
+  border-color: #374151 !important;
+}
+
+body.dark-mode .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select {
+  background-color: #1f2937;
+  color: #f9fafb;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+  color: #9ca3af;
+}
+
+body.dark-mode header {
+  background-color: rgba(17, 24, 39, 0.95);
+  border-color: #374151;
+}
+
+body.dark-mode footer {
+  background-color: #030712;
+}
+
+body.dark-mode .bg-gray-950 {
+  background-color: #030712 !important;
+}
+
+body.dark-mode .hover\:bg-gray-50:hover {
+  background-color: #374151 !important;
+}
