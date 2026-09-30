@@ -1,61 +1,77 @@
+
 import { useState } from "react"
 
+import { useToast } from "../context/ToastContext"
+
 function Newsletter() {
+  const { showToast } = useToast()
   const [email, setEmail] = useState("")
-  const [submitted, setSubmitted] = useState(false)
 
   const handleSubmit = (event) => {
     event.preventDefault()
 
-    if (!email.trim()) return
+    const value = email.trim()
 
-    setSubmitted(true)
+    if (!value) {
+      showToast("Please enter your email address.", "error")
+      return
+    }
+
+    if (!value.includes("@")) {
+      showToast("Please enter a valid email address.", "error")
+      return
+    }
+
+    localStorage.setItem("fieldnote-newsletter-email", value)
     setEmail("")
+    showToast("You are subscribed to FieldNote.")
   }
 
   return (
-    <section className="rounded-3xl bg-gray-950 p-8 text-white md:p-12">
+    <section className="relative overflow-hidden border border-black/10 bg-[#1f5c43] px-6 py-10 text-white md:px-10 md:py-12 dark:border-white/10">
+      <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full border-[40px] border-white/5" />
 
-      <p className="text-sm font-bold uppercase tracking-widest text-blue-400">
-        Stay informed
-      </p>
+      <div className="absolute -bottom-24 -left-20 h-64 w-64 rounded-full border-[50px] border-white/5" />
 
-      <h2 className="mt-3 text-3xl font-bold">
-        Get useful stories in your inbox.
-      </h2>
+      <div className="relative grid gap-8 lg:grid-cols-[1fr_460px] lg:items-center">
+        <div>
+          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#b8d6c5]">
+            FieldNote Briefing
+          </p>
 
-      <p className="mt-3 max-w-xl text-gray-400">
-        A simple collection of practical ideas and real-world experiences.
-      </p>
+          <h2 className="mt-3 max-w-2xl text-3xl font-black tracking-[-0.04em] md:text-4xl">
+            Useful stories. Straight to your inbox.
+          </h2>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-3 sm:flex-row">
+          <p className="mt-4 max-w-xl text-sm leading-7 text-white/70">
+            Get selected stories, practical insights and important ideas from
+            FieldNote without the noise.
+          </p>
+        </div>
 
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          placeholder="Your email address"
-          className="flex-1 rounded-full px-5 py-3 text-gray-900 outline-none"
-        />
-
-        <button
-          type="submit"
-          className="rounded-full bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-500"
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-3 sm:flex-row"
         >
-          Subscribe
-        </button>
+          <input
+            type="email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            placeholder="Your email address"
+            className="min-w-0 flex-1 border border-white/20 bg-white px-4 py-3.5 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:border-white"
+          />
 
-      </form>
-
-      {submitted && (
-        <p className="mt-4 text-sm text-green-400">
-          Thanks! You are subscribed.
-        </p>
-      )}
-
+          <button
+            type="submit"
+            className="bg-[#171916] px-6 py-3.5 text-sm font-bold text-white transition hover:bg-black"
+          >
+            Subscribe
+          </button>
+        </form>
+      </div>
     </section>
   )
 }
 
 export default Newsletter
+

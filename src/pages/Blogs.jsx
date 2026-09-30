@@ -1,188 +1,154 @@
-import { useEffect, useState } from "react"
+
+import { useMemo, useState } from "react"
+
+import BlogCard from "../components/BlogCard"
+import SearchBar from "../components/SearchBar"
+import Pagination from "../components/Pagination"
+import EmptyState from "../components/EmptyState"
 
 import { useBlogs } from "../hooks/useBlogs"
-import BlogCard from "../components/BlogCard"
-import Pagination from "../components/Pagination"
 
 function Blogs() {
   const { blogs } = useBlogs()
 
-  const [search, setSearch] = useState("")
-  const [category, setCategory] = useState("All")
-  const [sort, setSort] = useState("latest")
+  const [category, setCategory] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
 
   const postsPerPage = 6
 
   const categories = [
-    "All",
-    ...new Set(blogs.map((blog) => blog.category)),
+    "all",
+    ...new Set(blogs.map((blog) => blog.categorySlug)),
   ]
 
-  const filteredBlogs = blogs
-    .filter((blog) => {
-      const searchText = `
-        ${blog.title}
-        ${blog.excerpt}
-        ${blog.author}
-        ${blog.category}
-        ${blog.tags.join(" ")}
-      `.toLowerCase()
+  const filteredBlogs = useMemo(() => {
+    if (category === "all") {
+      return blogs
+    }
 
-      return searchText.includes(search.toLowerCase())
-    })
-    .filter((blog) => {
-      return category === "All" || blog.category === category
-    })
-    .sort((a, b) => {
-      if (sort === "popular") {
-        return b.likes - a.likes
-      }
+    return blogs.filter(
+      (blog) => blog.categorySlug === category
+    )
+  }, [blogs, category])
 
-      return b.id - a.id
-    })
+  const totalPages = Math.ceil(
+    filteredBlogs.length / postsPerPage
+  )
 
-  const totalPages = Math.ceil(filteredBlogs.length / postsPerPage)
+  const safePage = Math.min(
+    currentPage,
+    Math.max(totalPages, 1)
+  )
 
-  const startIndex = (currentPage - 1) * postsPerPage
+  const startIndex = (safePage - 1) * postsPerPage
 
-  const currentBlogs = filteredBlogs.slice(
+  const visibleBlogs = filteredBlogs.slice(
     startIndex,
     startIndex + postsPerPage
   )
 
-  useEffect(() => {
+  const handleCategory = (value) => {
+    setCategory(value)
     setCurrentPage(1)
-  }, [search, category, sort])
+  }
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-20">
+    <main className="newsroom-page min-h-screen">
+      <section className="border-b border-black/10 dark:border-white/10">
+        <div className="mx-auto max-w-[1400px] px-6 py-14 md:px-8 md:py-20">
+          <div className="grid gap-8 lg:grid-cols-[1fr_420px] lg:items-end">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#1f5c43]">
+                FieldNote Archive
+              </p>
 
-      {/* Heading */}
-      <div>
-        <p className="text-sm font-bold uppercase tracking-widest text-blue-600">
-          Explore
-        </p>
+              <h1 className="mt-4 text-5xl font-black leading-none tracking-[-0.06em] text-gray-950 md:text-7xl dark:text-white">
+                Latest stories.
+              </h1>
 
-        <h1 className="mt-3 text-5xl font-bold text-gray-900">
-          All Stories
-        </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-gray-600 dark:text-gray-400">
+                Explore practical stories, real experiences and useful
+                ideas from across the FieldNote newsroom.
+              </p>
+            </div>
 
-        <p className="mt-5 max-w-2xl text-gray-600">
-          Find practical stories, real experiences and useful ideas.
-        </p>
-      </div>
+            <SearchBar />
+          </div>
+        </div>
+      </section>
 
-      {/* Filters */}
-      <div className="mt-12 rounded-2xl border border-gray-200 bg-white p-5">
+      <section className="border-b border-black/10 dark:border-white/10">
+        <div className="mx-auto flex max-w-[1400px] gap-2 overflow-x-auto px-6 py-5 md:px-8">
+          {categories.map((item) => {
+            const active = category === item
 
-        <div className="grid gap-4 md:grid-cols-[1fr_auto]">
+            return (
+              <button
+                key={item}
+                onClick={() => handleCategory(item)}
+                className={`shrink-0 px-5 py-2.5 text-xs font-black uppercase tracking-[0.12em] transition ${
+                  active
+                    ? "bg-[#1f5c43] text-white"
+                    : "border border-black/10 text-gray-600 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-400"
+                }`}
+              >
+                {item === "all" ? "All Stories" : item}
+              </button>
+            )
+          })}
+        </div>
+      </section>
 
-          {/* Search */}
-          <input
-            type="text"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search stories, authors, tags..."
-            className="rounded-xl border border-gray-300 px-5 py-3 outline-none focus:border-blue-500"
-          />
+      <section className="mx-auto max-w-[1400px] px-6 py-14 md:px-8 md:py-20">
+        <div className="mb-8 flex flex-col gap-3 border-b border-black/10 pb-6 sm:flex-row sm:items-end sm:justify-between dark:border-white/10">
+          <div>
+            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1f5c43]">
+              {category === "all" ? "All Sections" : category}
+            </p>
 
-          {/* Sort */}
-          <select
-            value={sort}
-            onChange={(event) => setSort(event.target.value)}
-            className="rounded-xl border border-gray-300 px-5 py-3 outline-none"
-          >
-            <option value="latest">
-              Latest
-            </option>
+            <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] text-gray-950 dark:text-white">
+              {filteredBlogs.length}{" "}
+              {filteredBlogs.length === 1 ? "story" : "stories"}
+            </h2>
+          </div>
 
-            <option value="popular">
-              Most Liked
-            </option>
-          </select>
-
+          {filteredBlogs.length > 0 && (
+            <p className="text-sm font-medium text-gray-500">
+              Showing {startIndex + 1}–
+              {Math.min(
+                startIndex + postsPerPage,
+                filteredBlogs.length
+              )}
+            </p>
+          )}
         </div>
 
-        {/* Categories */}
-        <div className="mt-5 flex flex-wrap gap-2">
+        {visibleBlogs.length > 0 ? (
+          <>
+            <div className="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+              {visibleBlogs.map((blog) => (
+                <BlogCard
+                  key={blog.id}
+                  blog={blog}
+                />
+              ))}
+            </div>
 
-          {categories.map((item) => (
-            <button
-              key={item}
-              onClick={() => setCategory(item)}
-              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
-                category === item
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-blue-600"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-
-        </div>
-
-      </div>
-
-      {/* Result Count */}
-      <div className="mt-10 flex items-center justify-between">
-
-        <p className="text-sm text-gray-500">
-          {filteredBlogs.length}{" "}
-          {filteredBlogs.length === 1 ? "story" : "stories"} found
-        </p>
-
-        {(search || category !== "All") && (
-          <button
-            onClick={() => {
-              setSearch("")
-              setCategory("All")
-              setSort("latest")
-            }}
-            className="text-sm font-semibold text-blue-600 hover:text-blue-800"
-          >
-            Clear filters
-          </button>
-        )}
-
-      </div>
-
-      {/* Blog Grid */}
-      {currentBlogs.length > 0 ? (
-        <div className="mt-6 grid gap-7 md:grid-cols-2 lg:grid-cols-3">
-          {currentBlogs.map((blog) => (
-            <BlogCard
-              key={blog.id}
-              blog={blog}
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
             />
-          ))}
-        </div>
-      ) : (
-        <div className="mt-8 rounded-2xl bg-gray-50 px-6 py-20 text-center">
-
-          <p className="text-4xl">
-            🔎
-          </p>
-
-          <h2 className="mt-4 text-2xl font-bold text-gray-900">
-            No stories found
-          </h2>
-
-          <p className="mt-2 text-gray-500">
-            Try a different search term or category.
-          </p>
-
-        </div>
-      )}
-
-      {/* Pagination */}
-      <Pagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        onPageChange={setCurrentPage}
-      />
-
+          </>
+        ) : (
+          <EmptyState
+            title="No stories found"
+            message="There are no stories in this section yet."
+            actionText="View all stories"
+            actionLink="/blogs"
+          />
+        )}
+      </section>
     </main>
   )
 }

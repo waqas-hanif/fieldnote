@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 * {
@@ -10,85 +11,202 @@ html {
 
 body {
   margin: 0;
-  font-family: Arial, Helvetica, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
+  background: #f4f1eb;
+  color: #171916;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Dark mode */
+button,
+a,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+::selection {
+  background: #1f5c43;
+  color: white;
+}
+
+.newsroom-page {
+  background:
+    radial-gradient(circle at top right, rgba(31, 92, 67, 0.06), transparent 30%),
+    #f4f1eb;
+}
+
+.editorial-border {
+  border-color: rgba(23, 25, 22, 0.1);
+}
+
+.news-ticker {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.news-ticker-track {
+  display: inline-flex;
+  min-width: max-content;
+  animation: ticker 28s linear infinite;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.news-image {
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.news-card:hover .news-image {
+  transform: scale(1.04);
+}
+
+.ai-float {
+  animation: aiFloat 3s ease-in-out infinite;
+}
+
+@keyframes aiFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-7px);
+  }
+}
+
+.ai-pulse {
+  animation: aiPulse 2s ease-in-out infinite;
+}
+
+@keyframes aiPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(31, 92, 67, 0.25);
+  }
+
+  50% {
+    box-shadow: 0 0 0 12px rgba(31, 92, 67, 0);
+  }
+}
+
+.reveal-card {
+  animation: revealCard 0.6s ease both;
+}
+
+@keyframes revealCard {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 body.dark-mode {
-  background-color: #111827;
-  color: #f9fafb;
+  background: #101411;
+  color: #f4f1eb;
+}
+
+body.dark-mode .newsroom-page {
+  background:
+    radial-gradient(circle at top right, rgba(74, 139, 105, 0.08), transparent 30%),
+    #101411;
 }
 
 body.dark-mode .bg-white {
-  background-color: #1f2937 !important;
+  background-color: #171c18 !important;
 }
 
 body.dark-mode .bg-gray-50 {
-  background-color: #111827 !important;
+  background-color: #141914 !important;
 }
 
 body.dark-mode .bg-gray-100 {
-  background-color: #1f2937 !important;
+  background-color: #202620 !important;
 }
 
+body.dark-mode .bg-gray-950 {
+  background-color: #090d0a !important;
+}
+
+body.dark-mode .text-gray-950,
 body.dark-mode .text-gray-900 {
-  color: #f9fafb !important;
+  color: #f4f1eb !important;
 }
 
+body.dark-mode .text-gray-800,
 body.dark-mode .text-gray-700 {
-  color: #d1d5db !important;
+  color: #d6ddd7 !important;
 }
 
-body.dark-mode .text-gray-600 {
-  color: #9ca3af !important;
-}
-
+body.dark-mode .text-gray-600,
 body.dark-mode .text-gray-500 {
-  color: #9ca3af !important;
+  color: #aab4ad !important;
 }
 
 body.dark-mode .text-gray-400 {
-  color: #9ca3af !important;
+  color: #87928a !important;
 }
 
-body.dark-mode .border-gray-200 {
-  border-color: #374151 !important;
-}
-
-body.dark-mode .border-gray-100 {
-  border-color: #374151 !important;
-}
-
+body.dark-mode .border-gray-100,
+body.dark-mode .border-gray-200,
 body.dark-mode .border-gray-300 {
-  border-color: #4b5563 !important;
+  border-color: #303930 !important;
 }
 
 body.dark-mode input,
 body.dark-mode textarea,
 body.dark-mode select {
-  background-color: #1f2937;
-  color: #f9fafb;
+  background-color: #171c18;
+  color: #f4f1eb;
+  border-color: #303930;
 }
 
 body.dark-mode input::placeholder,
 body.dark-mode textarea::placeholder {
-  color: #9ca3af;
+  color: #7f8b82;
 }
 
 body.dark-mode header {
-  background-color: rgba(17, 24, 39, 0.95);
-  border-color: #374151;
+  background-color: rgba(16, 20, 17, 0.94);
+  border-color: #303930;
 }
 
 body.dark-mode footer {
-  background-color: #030712;
+  background-color: #080c09;
 }
 
-body.dark-mode .bg-gray-950 {
-  background-color: #030712 !important;
+body.dark-mode .editorial-border {
+  border-color: rgba(244, 241, 235, 0.1);
 }
 
-body.dark-mode .hover\:bg-gray-50:hover {
-  background-color: #374151 !important;
+::-webkit-scrollbar {
+  width: 9px;
 }
+
+::-webkit-scrollbar-track {
+  background: #e9e5dc;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #8b918b;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1f5c43;
+}
+

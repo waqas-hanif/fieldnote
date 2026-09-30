@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 
 import Header from "./components/Header"
@@ -14,56 +13,49 @@ import Search from "./pages/Search"
 import Bookmarks from "./pages/Bookmarks"
 import AddBlog from "./pages/AddBlog"
 import About from "./pages/About"
+import Contact from "./pages/Contact"
+import Privacy from "./pages/Privacy"
+import Terms from "./pages/Terms"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import NotFound from "./pages/NotFound"
 
 function App() {
-  return (
-    <BrowserRouter>
+return ( <BrowserRouter> <Header />
 
-      <Header />
+  <Routes>
+    <Route path="/" element={<Home />} />
+    <Route path="/blogs" element={<Blogs />} />
+    <Route path="/blog/:id" element={<BlogDetails />} />
+    <Route path="/category/:slug" element={<Category />} />
+    <Route path="/author/:id" element={<Author />} />
+    <Route path="/search" element={<Search />} />
+    <Route path="/bookmarks" element={<Bookmarks />} />
 
-      <Routes>
+    <Route
+      path="/add-blog"
+      element={
+        <ProtectedRoute>
+          <AddBlog />
+        </ProtectedRoute>
+      }
+    />
 
-        <Route path="/" element={<Home />} />
+    <Route path="/about" element={<About />} />
+    <Route path="/contact" element={<Contact />} />
+    <Route path="/privacy" element={<Privacy />} />
+    <Route path="/terms" element={<Terms />} />
 
-        <Route path="/blogs" element={<Blogs />} />
+    <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} />
 
-        <Route path="/blog/:id" element={<BlogDetails />} />
+    <Route path="*" element={<NotFound />} />
+  </Routes>
 
-        <Route path="/category/:slug" element={<Category />} />
+  <Footer />
+</BrowserRouter>
 
-        <Route path="/author/:id" element={<Author />} />
-
-        <Route path="/search" element={<Search />} />
-
-        <Route path="/bookmarks" element={<Bookmarks />} />
-
-        <Route
-          path="/add-blog"
-          element={
-            <ProtectedRoute>
-              <AddBlog />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route path="/about" element={<About />} />
-
-        <Route path="/login" element={<Login />} />
-
-        <Route path="/register" element={<Register />} />
-
-        <Route path="*" element={<NotFound />} />
-
-      </Routes>
-
-      <Footer />
-
-    </BrowserRouter>
-  )
+)
 }
 
 export default App
-

@@ -1,34 +1,42 @@
 
-import { Link } from "react-router-dom"
+function BlogMeta({ blog }) {
+  if (!blog) return null
 
-function BlogMeta({ author, authorId, date, readTime }) {
   return (
-    <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+    <div className="flex flex-wrap items-center gap-4 border-y border-black/10 py-5 dark:border-white/10">
+      <div className="flex items-center gap-3">
+        <img
+          src={blog.author?.avatar}
+          alt={blog.author?.name}
+          className="h-10 w-10 rounded-full object-cover"
+        />
 
-      {authorId ? (
-        <Link
-          to={`/author/${authorId}`}
-          className="font-medium text-gray-700 hover:text-blue-600"
-        >
-          {author}
-        </Link>
-      ) : (
-        <span className="font-medium text-gray-700">
-          {author}
-        </span>
-      )}
+        <div>
+          <p className="text-sm font-bold text-gray-950 dark:text-white">
+            {blog.author?.name}
+          </p>
 
-      <span>•</span>
+          <p className="text-xs text-gray-500">
+            {blog.author?.role}
+          </p>
+        </div>
+      </div>
 
-      <span>{date}</span>
+      <span className="hidden h-5 w-px bg-black/10 sm:block dark:bg-white/10" />
 
-      <span>•</span>
+      <div className="flex flex-wrap items-center gap-3 text-xs font-semibold text-gray-500">
+        <span>{blog.date}</span>
 
-      <span>{readTime} min read</span>
+        <span className="h-1 w-1 rounded-full bg-[#1f5c43]" />
 
+        <span>{blog.readTime} min read</span>
+
+        <span className="h-1 w-1 rounded-full bg-[#1f5c43]" />
+
+        <span>{blog.category}</span>
+      </div>
     </div>
   )
 }
 
 export default BlogMeta
-

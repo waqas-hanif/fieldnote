@@ -2,289 +2,234 @@
 import { useEffect, useState } from "react"
 import { Link, useLocation } from "react-router-dom"
 
+import { site } from "../data/site"
 import { useAuth } from "../context/AuthContext"
 
 function Header() {
-  const [menuOpen, setMenuOpen] = useState(false)
+  const { user, logout, isAuthenticated } = useAuth()
+  const location = useLocation()
 
+  const [menuOpen, setMenuOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(() => {
-    return (
-      localStorage.getItem("fieldnote-theme") ===
-      "dark"
-    )
+    return localStorage.getItem("fieldnote-theme") === "dark"
   })
 
-  const { user, logout } = useAuth()
-  const { pathname } = useLocation()
-
   useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark-mode")
-      localStorage.setItem(
-        "fieldnote-theme",
-        "dark"
-      )
-    } else {
-      document.body.classList.remove("dark-mode")
-      localStorage.setItem(
-        "fieldnote-theme",
-        "light"
-      )
-    }
+    document.body.classList.toggle("dark-mode", darkMode)
+
+    localStorage.setItem(
+      "fieldnote-theme",
+      darkMode ? "dark" : "light"
+    )
   }, [darkMode])
 
   useEffect(() => {
     setMenuOpen(false)
-  }, [pathname])
-
-  const closeMenu = () => {
-    setMenuOpen(false)
-  }
+  }, [location.pathname])
 
   const handleLogout = () => {
     logout()
-    closeMenu()
   }
 
-  const navClass = (active) =>
-    `text-sm font-medium transition ${
-      active
-        ? "text-blue-600"
-        : "text-gray-700 hover:text-blue-600"
-    }`
-
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
+    <>
+      <div className="news-ticker border-b border-black/10 bg-[#171916] px-4 py-2 text-[10px] font-bold uppercase tracking-[0.15em] text-white">
+        <div className="news-ticker-track gap-12">
+          <span>
+            FieldNote · Real-world knowledge, clearly told.
+          </span>
 
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <span>
+            Technology · Agriculture · Business · Careers · World · Science
+          </span>
 
-        <Link
-          to="/"
-          onClick={closeMenu}
-          className="text-2xl font-bold text-gray-900"
-          aria-label="FieldNote home"
-        >
-          Field<span className="text-blue-600">Note</span>
-        </Link>
+          <span>
+            FieldNote · Real-world knowledge, clearly told.
+          </span>
 
-        <nav className="hidden items-center gap-7 md:flex">
+          <span>
+            Technology · Agriculture · Business · Careers · World · Science
+          </span>
+        </div>
+      </div>
 
-          <Link
-            to="/"
-            className={navClass(pathname === "/")}
-          >
-            Home
-          </Link>
+      <header className="sticky top-0 z-50 border-b border-black/10 bg-[#f4f1eb]/95 backdrop-blur-xl dark:border-white/10 dark:bg-[#101411]/95">
+        <div className="mx-auto max-w-[1400px] px-6 md:px-8">
+          <div className="flex h-20 items-center justify-between gap-6">
+            <Link
+              to="/"
+              className="group shrink-0"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center bg-[#1f5c43] text-lg font-black text-white transition duration-300 group-hover:rotate-3 group-hover:scale-105">
+                  F
+                </div>
 
-          <Link
-            to="/blogs"
-            className={navClass(pathname === "/blogs")}
-          >
-            Explore
-          </Link>
+                <div>
+                  <p className="text-xl font-black tracking-[-0.04em] text-gray-950 dark:text-white">
+                    FieldNote
+                  </p>
 
-          <Link
-            to="/search"
-            className={navClass(pathname === "/search")}
-          >
-            Search
-          </Link>
-
-          <Link
-            to="/bookmarks"
-            className={navClass(
-              pathname === "/bookmarks"
-            )}
-          >
-            Saved
-          </Link>
-
-          <Link
-            to="/about"
-            className={navClass(
-              pathname === "/about"
-            )}
-          >
-            About
-          </Link>
-
-        </nav>
-
-        <div className="hidden items-center gap-3 md:flex">
-
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-blue-500 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label="Toggle dark mode"
-          >
-            {darkMode ? "☀ Light" : "🌙 Dark"}
-          </button>
-
-          {user ? (
-            <>
-              <div className="hidden max-w-[150px] truncate rounded-full bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 lg:block">
-                👤 {user.name}
+                  <p className="hidden text-[9px] font-bold uppercase tracking-[0.12em] text-gray-500 sm:block">
+                    Real-world knowledge
+                  </p>
+                </div>
               </div>
+            </Link>
 
-              <button
-                onClick={handleLogout}
-                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:border-red-500 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-300"
+            <nav className="hidden items-center gap-7 lg:flex">
+              {site.navigation.map((item) => {
+                const active = location.pathname === item.path
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`relative text-xs font-bold transition duration-300 hover:text-[#1f5c43] ${
+                      active
+                        ? "text-[#1f5c43]"
+                        : "text-gray-700 dark:text-gray-300"
+                    }`}
+                  >
+                    {item.label}
+
+                    <span
+                      className={`absolute -bottom-2 left-0 h-0.5 bg-[#1f5c43] transition-all duration-300 ${
+                        active ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+                )
+              })}
+            </nav>
+
+            <div className="hidden items-center gap-2 lg:flex">
+              <Link
+                to="/search"
+                className="flex h-10 w-10 items-center justify-center text-lg text-gray-600 transition duration-300 hover:bg-white hover:text-[#1f5c43] dark:text-gray-300 dark:hover:bg-[#171c18]"
+                aria-label="Search FieldNote"
               >
-                Logout
-              </button>
+                ⌕
+              </Link>
+
+              <Link
+                to="/bookmarks"
+                className="border border-black/10 px-4 py-2.5 text-xs font-bold text-gray-700 transition duration-300 hover:-translate-y-0.5 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
+              >
+                Saved
+              </Link>
 
               <Link
                 to="/add-blog"
-                className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
+                className="bg-[#1f5c43] px-4 py-2.5 text-xs font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#174632] hover:shadow-lg"
               >
-                Write a Story
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link
-                to="/login"
-                className="rounded-full border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition hover:border-blue-500 hover:text-blue-600"
-              >
-                Login
+                + Write Story
               </Link>
 
-              <Link
-                to="/register"
-                className="rounded-full bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
+              <button
+                onClick={() => setDarkMode(!darkMode)}
+                className="flex h-10 w-10 items-center justify-center border border-black/10 text-sm transition duration-300 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
+                aria-label="Toggle dark mode"
               >
-                Get Started
-              </Link>
-            </>
-          )}
+                {darkMode ? "☀" : "☾"}
+              </button>
 
-        </div>
+              {isAuthenticated ? (
+                <div className="flex items-center gap-2">
+                  <div className="border border-black/10 px-3 py-2 dark:border-white/10">
+                    <p className="max-w-[100px] truncate text-xs font-bold text-gray-900 dark:text-white">
+                      {user?.name}
+                    </p>
+                  </div>
 
-        <div className="flex items-center gap-2 md:hidden">
-
-          <button
-            onClick={() => setDarkMode(!darkMode)}
-            className="rounded-full border border-gray-300 px-3 py-2 text-sm"
-            aria-label="Toggle dark mode"
-          >
-            {darkMode ? "☀" : "🌙"}
-          </button>
-
-          <button
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="rounded-lg p-2 text-2xl text-gray-900"
-            aria-label="Toggle navigation menu"
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? "✕" : "☰"}
-          </button>
-
-        </div>
-
-      </div>
-
-      {menuOpen && (
-        <div className="border-t border-gray-200 bg-white px-6 py-5 md:hidden">
-
-          <nav className="flex flex-col gap-4">
-
-            <Link
-              to="/"
-              onClick={closeMenu}
-              className={navClass(pathname === "/")}
-            >
-              Home
-            </Link>
-
-            <Link
-              to="/blogs"
-              onClick={closeMenu}
-              className={navClass(
-                pathname === "/blogs"
+                  <button
+                    onClick={handleLogout}
+                    className="px-3 py-2 text-xs font-bold text-gray-500 transition hover:text-red-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              ) : (
+                <Link
+                  to="/login"
+                  className="border border-black/10 px-4 py-2.5 text-xs font-bold text-gray-700 transition duration-300 hover:-translate-y-0.5 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
+                >
+                  Sign In
+                </Link>
               )}
+            </div>
+
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex h-11 w-11 items-center justify-center border border-black/10 text-xl text-gray-800 transition hover:border-[#1f5c43] hover:text-[#1f5c43] lg:hidden dark:border-white/10 dark:text-white"
+              aria-label="Toggle menu"
             >
-              Explore
-            </Link>
+              {menuOpen ? "✕" : "☰"}
+            </button>
+          </div>
 
-            <Link
-              to="/search"
-              onClick={closeMenu}
-              className={navClass(
-                pathname === "/search"
-              )}
-            >
-              Search
-            </Link>
+          {menuOpen && (
+            <div className="border-t border-black/10 py-5 lg:hidden dark:border-white/10">
+              <nav className="flex flex-col">
+                {site.navigation.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className="border-b border-black/5 py-3 text-sm font-bold text-gray-700 transition hover:pl-2 hover:text-[#1f5c43] dark:border-white/5 dark:text-gray-300"
+                  >
+                    {item.label}
+                  </Link>
+                ))}
 
-            <Link
-              to="/bookmarks"
-              onClick={closeMenu}
-              className={navClass(
-                pathname === "/bookmarks"
-              )}
-            >
-              Saved Stories
-            </Link>
+                <Link
+                  to="/search"
+                  className="border-b border-black/5 py-3 text-sm font-bold text-gray-700 transition hover:pl-2 hover:text-[#1f5c43] dark:border-white/5 dark:text-gray-300"
+                >
+                  Search
+                </Link>
 
-            <Link
-              to="/about"
-              onClick={closeMenu}
-              className={navClass(
-                pathname === "/about"
-              )}
-            >
-              About
-            </Link>
+                <Link
+                  to="/bookmarks"
+                  className="border-b border-black/5 py-3 text-sm font-bold text-gray-700 transition hover:pl-2 hover:text-[#1f5c43] dark:border-white/5 dark:text-gray-300"
+                >
+                  Saved Stories
+                </Link>
 
-            {user && (
-              <div className="rounded-xl bg-gray-100 px-4 py-3 text-sm font-medium text-gray-700">
-                👤 {user.name}
-              </div>
-            )}
-
-            {user ? (
-              <>
                 <Link
                   to="/add-blog"
-                  onClick={closeMenu}
-                  className="mt-2 rounded-full bg-gray-900 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-600"
+                  className="mt-4 flex items-center justify-center bg-[#1f5c43] px-5 py-3.5 text-sm font-black text-white transition duration-300 hover:bg-[#174632] hover:shadow-lg"
                 >
-                  Write a Story
+                  + Write a Story
                 </Link>
 
                 <button
-                  onClick={handleLogout}
-                  className="rounded-full border border-gray-300 px-5 py-3 text-sm font-semibold text-gray-700 hover:border-red-500 hover:text-red-500"
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="mt-3 border border-black/10 px-5 py-3 text-sm font-bold text-gray-700 transition hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
                 >
-                  Logout
+                  {darkMode ? "☀ Light Mode" : "☾ Dark Mode"}
                 </button>
-              </>
-            ) : (
-              <>
-                <Link
-                  to="/login"
-                  onClick={closeMenu}
-                  className="mt-2 rounded-full border border-gray-300 px-5 py-3 text-center text-sm font-semibold text-gray-700 hover:border-blue-500 hover:text-blue-600"
-                >
-                  Login
-                </Link>
 
-                <Link
-                  to="/register"
-                  onClick={closeMenu}
-                  className="rounded-full bg-gray-900 px-5 py-3 text-center text-sm font-semibold text-white hover:bg-blue-600"
-                >
-                  Get Started
-                </Link>
-              </>
-            )}
-
-          </nav>
-
+                {isAuthenticated ? (
+                  <button
+                    onClick={handleLogout}
+                    className="mt-3 border border-red-200 px-5 py-3 text-sm font-bold text-red-600 transition hover:bg-red-50"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <Link
+                    to="/login"
+                    className="mt-3 border border-black/10 px-5 py-3 text-center text-sm font-bold text-gray-700 transition hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
+                  >
+                    Sign In
+                  </Link>
+                )}
+              </nav>
+            </div>
+          )}
         </div>
-      )}
-
-    </header>
+      </header>
+    </>
   )
 }
 

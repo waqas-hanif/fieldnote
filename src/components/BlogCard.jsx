@@ -1,104 +1,113 @@
 
 import { Link } from "react-router-dom"
 
-import BlogMeta from "./BlogMeta"
 import { useBlogs } from "../hooks/useBlogs"
+import { authors } from "../data/authors"
 
 function BlogCard({ blog }) {
-  const {
-    likeBlog,
-    toggleBookmark,
-    isBookmarked,
-    comments,
-    views,
-  } = useBlogs()
+  const { likeBlog, toggleBookmark, isBookmarked } = useBlogs()
 
-  const commentCount = comments[blog.id]?.length || 0
-  const viewCount = views[blog.id] || 0
+  const saved = isBookmarked(blog.id)
+
+  const author = authors.find(
+    (item) => String(item.id) === String(blog.authorId)
+  )
 
   return (
-    <article className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:-translate-y-1 hover:shadow-xl">
-
-      {/* Image */}
-      <Link to={`/blog/${blog.id}`}>
-        <div className="aspect-[16/10] overflow-hidden">
-
+    <article className="news-card group overflow-hidden border border-black/10 bg-white transition duration-500 hover:-translate-y-1 hover:shadow-2xl dark:border-white/10 dark:bg-[#171c18]">
+      <Link to={`/blog/${blog.id}`} className="block overflow-hidden">
+        <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={blog.image}
             alt={blog.title}
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            className="news-image h-full w-full object-cover"
           />
 
+          <div className="absolute left-4 top-4">
+            <span className="bg-[#1f5c43] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white">
+              {blog.category}
+            </span>
+          </div>
+
+          {blog.trending && (
+            <div className="absolute right-4 top-4">
+              <span className="bg-[#171916] px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white">
+                Trending
+              </span>
+            </div>
+          )}
         </div>
       </Link>
 
       <div className="p-6">
+        <div className="mb-4 flex items-center gap-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500">
+          <span>{blog.date}</span>
+          <span className="h-1 w-1 rounded-full bg-[#1f5c43]" />
+          <span>{blog.readTime} min read</span>
+        </div>
 
-        {/* Category */}
-        <Link
-          to={`/category/${blog.categorySlug}`}
-          className="text-xs font-bold uppercase tracking-wider text-blue-600 hover:text-blue-800"
-        >
-          {blog.category}
-        </Link>
-
-        {/* Title */}
         <Link to={`/blog/${blog.id}`}>
-          <h2 className="mt-3 text-xl font-bold leading-7 text-gray-900 group-hover:text-blue-600">
+          <h3 className="text-xl font-black leading-tight tracking-[-0.03em] text-gray-950 transition group-hover:text-[#1f5c43] dark:text-white">
             {blog.title}
-          </h2>
+          </h3>
         </Link>
 
-        {/* Description */}
-        <p className="mt-3 line-clamp-3 text-sm leading-6 text-gray-600">
+        <p className="mt-4 line-clamp-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
           {blog.excerpt}
         </p>
 
-        {/* Author */}
-        <div className="mt-5">
-          <BlogMeta
-            author={blog.author}
-            authorId={blog.authorId}
-            date={blog.date}
-            readTime={blog.readTime}
-          />
+        <div className="mt-6 flex items-center justify-between border-t border-black/10 pt-5 dark:border-white/10">
+          <Link
+            to={`/author/${blog.authorId}`}
+            className="flex items-center gap-3"
+          >
+            <img
+              src={author?.avatar}
+              alt={author?.name}
+              className="h-9 w-9 rounded-full object-cover transition hover:scale-105"
+            />
+
+            <div>
+              <p className="text-xs font-bold text-gray-900 hover:text-[#1f5c43] dark:text-white">
+                {author?.name}
+              </p>
+
+              <p className="text-[10px] text-gray-500">
+                {author?.role}
+              </p>
+            </div>
+          </Link>
+
+          <Link
+            to={`/blog/${blog.id}`}
+            className="text-sm font-black text-[#1f5c43] transition hover:translate-x-1"
+          >
+            Read →
+          </Link>
         </div>
 
-        {/* Stats */}
-        <div className="mt-5 flex flex-wrap gap-3 border-t border-gray-100 pt-4">
-
+        <div className="mt-5 flex items-center justify-between">
           <button
             onClick={() => likeBlog(blog.id)}
-            className="text-sm text-gray-500 transition hover:text-red-500"
+            className="flex items-center gap-2 text-sm font-semibold text-gray-500 transition hover:text-[#1f5c43]"
           >
-            ♥ {blog.likes}
+            <span>♡</span>
+            <span>{blog.likes}</span>
           </button>
-
-          <span className="text-sm text-gray-400">
-            👁 {viewCount}
-          </span>
-
-          <span className="text-sm text-gray-400">
-            💬 {commentCount}
-          </span>
 
           <button
             onClick={() => toggleBookmark(blog.id)}
-            className={`ml-auto text-sm font-medium transition ${
-              isBookmarked(blog.id)
-                ? "text-blue-600"
-                : "text-gray-500 hover:text-blue-600"
+            className={`text-sm font-bold transition ${
+              saved
+                ? "text-[#1f5c43]"
+                : "text-gray-400 hover:text-[#1f5c43]"
             }`}
+            aria-label={saved ? "Remove bookmark" : "Save story"}
           >
-            {isBookmarked(blog.id)
-              ? "★ Saved"
-              : "☆ Save"}
+            {saved ? "★ Saved" : "☆ Save"}
           </button>
-
         </div>
-
       </div>
-
     </article>
   )
 }

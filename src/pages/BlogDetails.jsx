@@ -1,15 +1,15 @@
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
-
-import { authors } from "../data/authors"
-import { useBlogs } from "../hooks/useBlogs"
-import { useToast } from "../context/ToastContext"
 
 import BlogMeta from "../components/BlogMeta"
 import QuickTake from "../components/QuickTake"
 import ResourceLinks from "../components/ResourceLinks"
 import RelatedBlogs from "../components/RelatedBlogs"
+import BrandSignature from "../components/BrandSignature"
+
+import { useBlogs } from "../hooks/useBlogs"
+import { authors } from "../data/authors"
 
 function BlogDetails() {
   const { id } = useParams()
@@ -18,465 +18,394 @@ function BlogDetails() {
     blogs,
     comments,
     views,
-    likeBlog,
     addView,
+    likeBlog,
     toggleBookmark,
     isBookmarked,
     addComment,
     deleteComment,
   } = useBlogs()
 
-  const { showToast } = useToast()
-
   const blog = blogs.find(
-    (item) => item.id === Number(id)
+    (item) => String(item.id) === String(id)
+  )
+
+  const author = authors.find(
+    (item) => String(item.id) === String(blog?.authorId)
   )
 
   const [name, setName] = useState("")
   const [commentText, setCommentText] = useState("")
-  const [copied, setCopied] = useState(false)
-
-  const author = authors.find(
-    (item) => item.id === blog?.authorId
-  )
 
   useEffect(() => {
     if (blog) {
       addView(blog.id)
     }
-  }, [id])
+  }, [blog?.id])
+
+  const relatedBlogs = useMemo(() => {
+    if (!blog) return []
+
+    return blogs
+      .filter(
+        (item) =>
+          item.id !== blog.id &&
+          item.categorySlug === blog.categorySlug
+      )
+      .slice(0, 3)
+  }, [blogs, blog])
 
   if (!blog) {
     return (
-      <main className="flex min-h-[70vh] items-center justify-center px-6">
-        <div className="text-center">
-          <p className="text-7xl font-bold text-gray-300">
-            404
+      <main className="newsroom-page min-h-screen px-6 py-24">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-[#1f5c43]">
+            FieldNote
           </p>
 
-          <h1 className="mt-4 text-3xl font-bold text-gray-900">
+          <h1 className="mt-4 text-5xl font-black tracking-[-0.05em] text-gray-950 dark:text-white">
             Story not found
           </h1>
 
-          <p className="mt-3 text-gray-500">
-            The story you are looking for does not exist.
+          <p className="mx-auto mt-5 max-w-xl text-gray-600 dark:text-gray-400">
+            The story you are looking for may have been removed or
+            the link may be incorrect.
           </p>
 
           <Link
             to="/blogs"
-            className="mt-7 inline-block rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white hover:bg-blue-600"
+            className="mt-8 inline-flex bg-[#171916] px-6 py-3 text-sm font-bold text-white transition duration-300 hover:-translate-y-1 hover:bg-[#1f5c43] hover:shadow-lg"
           >
-            Browse Stories
+            Browse Latest Stories →
           </Link>
         </div>
       </main>
     )
   }
 
+  const saved = isBookmarked(blog.id)
   const blogComments = comments[blog.id] || []
   const viewCount = views[blog.id] || 0
-  const currentUrl = window.location.href
 
-  const relatedBlogs = blogs
-    .filter(
-      (item) =>
-        item.categorySlug === blog.categorySlug &&
-        item.id !== blog.id
-    )
-    .slice(0, 3)
+  const contentParagraphs = Array.isArray(blog.content)
+    ? blog.content
+    : String(blog.content || "")
+        .split("\n")
+        .filter(Boolean)
 
-  const handleCommentSubmit = (event) => {
+  const handleComment = (event) => {
     event.preventDefault()
 
-    if (!name.trim() || !commentText.trim()) {
-      showToast("Please fill in all comment fields.", "error")
-      return
-    }
+    if (!name.trim() || !commentText.trim()) return
 
     addComment(blog.id, {
       name: name.trim(),
       text: commentText.trim(),
     })
 
-    setName("")
     setCommentText("")
   }
 
-  const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(currentUrl)
-
-      setCopied(true)
-      showToast("Link copied successfully!")
-
-      setTimeout(() => {
-        setCopied(false)
-      }, 2000)
-    } catch {
-      showToast("Could not copy the link.", "error")
-    }
-  }
-
-  const shareStory = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: blog.title,
-          text: blog.excerpt,
-          url: currentUrl,
-        })
-
-        showToast("Story shared successfully!")
-      } catch {
-        // User cancelled sharing
-      }
-    } else {
-      copyLink()
-    }
-  }
-
-  const whatsappUrl =
-    `https://wa.me/?text=${encodeURIComponent(
-      `${blog.title} ${currentUrl}`
-    )}`
-
-  const facebookUrl =
-    `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
-      currentUrl
-    )}`
-
-  const twitterUrl =
-    `https://twitter.com/intent/tweet?text=${encodeURIComponent(
-      blog.title
-    )}&url=${encodeURIComponent(currentUrl)}`
-
   return (
-    <main className="mx-auto max-w-5xl px-6 py-16">
+    <main className="newsroom-page min-h-screen">
+      <article>
+        <header className="mx-auto max-w-5xl px-6 pb-10 pt-14 md:px-8 md:pt-20">
+          <Link
+            to={`/category/${blog.categorySlug}`}
+            className="inline-flex text-[10px] font-black uppercase tracking-[0.2em] text-[#1f5c43] transition duration-300 hover:translate-x-1 hover:underline"
+          >
+            {blog.category}
+          </Link>
 
-      {/* Category */}
-      <Link
-        to={`/category/${blog.categorySlug}`}
-        className="text-sm font-bold uppercase tracking-widest text-blue-600 hover:text-blue-800"
-      >
-        {blog.category}
-      </Link>
+          <h1 className="mt-5 text-4xl font-black leading-[1.02] tracking-[-0.055em] text-gray-950 md:text-6xl lg:text-7xl dark:text-white">
+            {blog.title}
+          </h1>
 
-      {/* Title */}
-      <h1 className="mt-5 text-4xl font-bold leading-tight text-gray-900 md:text-6xl">
-        {blog.title}
-      </h1>
+          <p className="mt-7 max-w-3xl text-lg leading-8 text-gray-600 md:text-xl dark:text-gray-400">
+            {blog.excerpt}
+          </p>
 
-      {/* Meta */}
-      <div className="mt-6">
-        <BlogMeta
-          author={blog.author}
-          authorId={blog.authorId}
-          date={blog.date}
-          readTime={blog.readTime}
-        />
-      </div>
-
-      {/* Image */}
-      <div className="mt-10 overflow-hidden rounded-3xl">
-        <img
-          src={blog.image}
-          alt={blog.title}
-          className="max-h-[550px] w-full object-cover"
-        />
-      </div>
-
-      {/* Stats */}
-      <div className="mt-8 flex flex-wrap gap-3">
-
-        <button
-          onClick={() => likeBlog(blog.id)}
-          className="rounded-full border border-gray-300 px-5 py-2 text-sm transition hover:border-red-400 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-red-200"
-        >
-          ♥ {blog.likes}
-        </button>
-
-        <button
-          onClick={() => toggleBookmark(blog.id)}
-          className={`rounded-full border px-5 py-2 text-sm transition ${
-            isBookmarked(blog.id)
-              ? "border-blue-500 text-blue-600"
-              : "border-gray-300 hover:border-blue-400 hover:text-blue-600"
-          }`}
-        >
-          {isBookmarked(blog.id)
-            ? "★ Saved"
-            : "☆ Save"}
-        </button>
-
-        <span className="rounded-full border border-gray-300 px-5 py-2 text-sm text-gray-500">
-          👁 {viewCount} Views
-        </span>
-
-        <span className="rounded-full border border-gray-300 px-5 py-2 text-sm text-gray-500">
-          💬 {blogComments.length} Comments
-        </span>
-
-        <span className="rounded-full border border-gray-300 px-5 py-2 text-sm text-gray-500">
-          ⏱ {blog.readTime} min read
-        </span>
-
-      </div>
-
-      {/* Share */}
-      <div className="mt-5 flex flex-wrap gap-3">
-
-        <button
-          onClick={shareStory}
-          className="rounded-full bg-gray-900 px-5 py-2 text-sm font-semibold text-white transition hover:bg-blue-600"
-        >
-          ↗ Share
-        </button>
-
-        <button
-          onClick={copyLink}
-          className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition hover:border-blue-500 hover:text-blue-600"
-        >
-          {copied ? "✓ Copied" : "🔗 Copy Link"}
-        </button>
-
-        <a
-          href={whatsappUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition hover:border-green-500 hover:text-green-600"
-        >
-          WhatsApp
-        </a>
-
-        <a
-          href={facebookUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition hover:border-blue-500 hover:text-blue-600"
-        >
-          Facebook
-        </a>
-
-        <a
-          href={twitterUrl}
-          target="_blank"
-          rel="noreferrer"
-          className="rounded-full border border-gray-300 px-5 py-2 text-sm font-medium transition hover:border-gray-900"
-        >
-          X
-        </a>
-
-      </div>
-
-      {/* Article */}
-      <div className="mt-12 grid gap-10 lg:grid-cols-[1fr_300px]">
-
-        <article className="text-lg leading-9 text-gray-700">
-
-          {blog.content
-            .trim()
-            .split("\n\n")
-            .map((paragraph, index) => (
-              <p
-                key={index}
-                className="mb-7"
-              >
-                {paragraph.trim()}
-              </p>
-            ))}
-
-        </article>
-
-        <aside>
-          <QuickTake
-            quickTake={blog.quickTake}
-          />
-        </aside>
-
-      </div>
-
-      {/* Author Profile */}
-      {author && (
-        <section className="mt-16 rounded-3xl border border-gray-200 bg-gray-50 p-7 md:p-9">
-
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
-
-            <img
-              src={author.avatar}
-              alt={`${author.name} profile`}
-              className="h-24 w-24 rounded-full object-cover ring-4 ring-white"
-            />
-
-            <div className="flex-1">
-
-              <p className="text-xs font-bold uppercase tracking-widest text-blue-600">
-                Written by
-              </p>
-
-              <h2 className="mt-2 text-2xl font-bold text-gray-900">
-                {author.name}
-              </h2>
-
-              <p className="mt-1 font-medium text-gray-600">
-                {author.role}
-              </p>
-
-              <p className="mt-3 max-w-2xl leading-7 text-gray-500">
-                {author.bio}
-              </p>
-
-            </div>
-
+          <div className="mt-8 flex flex-wrap items-center gap-5">
             <Link
-              to={`/author/${author.id}`}
-              className="rounded-full bg-gray-900 px-6 py-3 text-center text-sm font-semibold text-white transition hover:bg-blue-600"
+              to={`/author/${blog.authorId}`}
+              className="group flex items-center gap-3"
             >
-              View Profile →
+              <img
+                src={author?.avatar}
+                alt={author?.name}
+                className="h-12 w-12 rounded-full object-cover transition duration-300 group-hover:scale-110 group-hover:ring-4 group-hover:ring-[#1f5c43]/15"
+              />
+
+              <div>
+                <p className="text-sm font-bold text-gray-950 transition duration-300 group-hover:text-[#1f5c43] dark:text-white">
+                  {author?.name}
+                </p>
+
+                <p className="text-xs text-gray-500">
+                  {author?.role}
+                </p>
+
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.1em] text-[#1f5c43]">
+                  View profile →
+                </p>
+              </div>
             </Link>
 
+            <div className="hidden h-8 w-px bg-black/10 sm:block dark:bg-white/10" />
+
+            <BlogMeta blog={blog} />
+
+            <span className="text-xs font-semibold text-gray-500">
+              {viewCount} views
+            </span>
           </div>
+        </header>
 
-        </section>
-      )}
-
-      {/* Resources */}
-      <ResourceLinks
-        resources={blog.resources}
-      />
-
-      {/* Comments */}
-      <section className="mt-16 border-t border-gray-200 pt-12">
-
-        <div>
-          <p className="text-sm font-bold uppercase tracking-widest text-blue-600">
-            Community
-          </p>
-
-          <h2 className="mt-2 text-3xl font-bold text-gray-900">
-            Comments
-          </h2>
-
-          <p className="mt-2 text-gray-500">
-            Share your thoughts about this story.
-          </p>
+        <div className="mx-auto max-w-[1400px] px-6 md:px-8">
+          <Link
+            to={`/blog/${blog.id}`}
+            className="group block overflow-hidden border border-black/10 bg-white dark:border-white/10 dark:bg-[#171c18]"
+          >
+            <img
+              src={blog.image}
+              alt={blog.title}
+              className="h-[320px] w-full object-cover transition duration-700 group-hover:scale-[1.02] md:h-[520px] lg:h-[650px]"
+            />
+          </Link>
         </div>
 
-        {/* Comment Form */}
-        <form
-          onSubmit={handleCommentSubmit}
-          className="mt-8 rounded-2xl border border-gray-200 bg-white p-6"
-        >
+        <div className="mx-auto grid max-w-6xl gap-12 px-6 py-14 md:px-8 md:py-20 lg:grid-cols-[1fr_280px]">
+          <div>
+            <div className="flex flex-wrap gap-3 border-b border-black/10 pb-6 dark:border-white/10">
+              <button
+                onClick={() => likeBlog(blog.id)}
+                className="border border-black/10 px-5 py-2.5 text-sm font-semibold text-gray-600 transition duration-300 hover:-translate-y-0.5 hover:border-[#1f5c43] hover:text-[#1f5c43] hover:shadow-md dark:border-white/10 dark:text-gray-300"
+              >
+                ♡ {blog.likes} Likes
+              </button>
 
-          <div className="grid gap-4 md:grid-cols-2">
-
-            <input
-              type="text"
-              value={name}
-              onChange={(event) =>
-                setName(event.target.value)
-              }
-              placeholder="Your name"
-              className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              required
-            />
-
-            <input
-              type="text"
-              value={commentText}
-              onChange={(event) =>
-                setCommentText(event.target.value)
-              }
-              placeholder="Write a comment..."
-              className="rounded-xl border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              required
-            />
-
-          </div>
-
-          <button
-            type="submit"
-            className="mt-4 rounded-full bg-gray-900 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-600"
-          >
-            Post Comment
-          </button>
-
-        </form>
-
-        {/* Comments List */}
-        <div className="mt-8 space-y-4">
-
-          {blogComments.length === 0 ? (
-
-            <div className="rounded-2xl bg-gray-50 p-10 text-center">
-
-              <p className="text-3xl">
-                💬
-              </p>
-
-              <h3 className="mt-3 text-xl font-bold text-gray-900">
-                No comments yet
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-500">
-                Be the first person to share a thought.
-              </p>
-
+              <button
+                onClick={() => toggleBookmark(blog.id)}
+                className={`border px-5 py-2.5 text-sm font-semibold transition duration-300 hover:-translate-y-0.5 hover:shadow-md ${
+                  saved
+                    ? "border-[#1f5c43] text-[#1f5c43]"
+                    : "border-black/10 text-gray-600 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10 dark:text-gray-300"
+                }`}
+              >
+                {saved ? "★ Saved" : "☆ Save Story"}
+              </button>
             </div>
 
-          ) : (
+            <div className="mt-10">
+              <QuickTake quickTake={blog.quickTake} />
+            </div>
 
-            blogComments.map((comment) => (
+            <div className="mt-12">
+              {contentParagraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="mb-7 text-[17px] leading-8 text-gray-700 dark:text-gray-300"
+                >
+                  {paragraph}
+                </p>
+              ))}
+            </div>
 
-              <div
-                key={comment.id}
-                className="rounded-2xl border border-gray-200 bg-white p-6"
+            {blog.tags?.length > 0 && (
+              <div className="mt-10 flex flex-wrap gap-2 border-t border-black/10 pt-7 dark:border-white/10">
+                {blog.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="border border-black/10 px-3 py-1.5 text-xs font-semibold text-gray-500 transition duration-300 hover:-translate-y-0.5 hover:border-[#1f5c43] hover:text-[#1f5c43] dark:border-white/10"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-12">
+              <ResourceLinks
+                resources={blog.resources}
+                source={blog.source}
+              />
+            </div>
+
+            <section className="mt-16 border-t border-black/10 pt-10 dark:border-white/10">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-[#1f5c43]">
+                Discussion
+              </p>
+
+              <h2 className="mt-2 text-3xl font-black tracking-[-0.04em] text-gray-950 dark:text-white">
+                Join the conversation
+              </h2>
+
+              <form
+                onSubmit={handleComment}
+                className="mt-7 border border-black/10 bg-white p-6 transition duration-500 hover:border-[#1f5c43]/30 hover:shadow-xl dark:border-white/10 dark:bg-[#171c18]"
               >
+                <div className="grid gap-4 md:grid-cols-2">
+                  <input
+                    value={name}
+                    onChange={(event) =>
+                      setName(event.target.value)
+                    }
+                    placeholder="Your name"
+                    className="border border-black/10 bg-transparent px-4 py-3 text-sm outline-none transition duration-300 focus:border-[#1f5c43] focus:ring-2 focus:ring-[#1f5c43]/10 dark:border-white/10"
+                  />
 
-                <div className="flex items-start justify-between gap-4">
+                  <input
+                    value={commentText}
+                    onChange={(event) =>
+                      setCommentText(event.target.value)
+                    }
+                    placeholder="Write a comment"
+                    className="border border-black/10 bg-transparent px-4 py-3 text-sm outline-none transition duration-300 focus:border-[#1f5c43] focus:ring-2 focus:ring-[#1f5c43]/10 dark:border-white/10"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="mt-4 bg-[#1f5c43] px-6 py-3 text-sm font-bold text-white transition duration-300 hover:-translate-y-0.5 hover:bg-[#174632] hover:shadow-lg"
+                >
+                  Post Comment
+                </button>
+              </form>
+
+              <div className="mt-7 space-y-4">
+                {blogComments.length === 0 ? (
+                  <p className="text-sm text-gray-500">
+                    No comments yet. Be the first to share your thoughts.
+                  </p>
+                ) : (
+                  blogComments.map((comment) => (
+                    <div
+                      key={comment.id}
+                      className="border-l-2 border-[#1f5c43] bg-white p-5 transition duration-300 hover:translate-x-1 hover:shadow-lg dark:bg-[#171c18]"
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-bold text-gray-950 dark:text-white">
+                            {comment.name}
+                          </p>
+
+                          <p className="mt-1 text-xs text-gray-500">
+                            {comment.date}
+                          </p>
+                        </div>
+
+                        <button
+                          onClick={() =>
+                            deleteComment(
+                              blog.id,
+                              comment.id
+                            )
+                          }
+                          className="text-xs font-semibold text-gray-400 transition hover:text-red-500"
+                        >
+                          Delete
+                        </button>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-7 text-gray-600 dark:text-gray-400">
+                        {comment.text}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </section>
+          </div>
+
+          <aside className="lg:pt-10">
+            <div className="sticky top-28 space-y-5">
+              <Link
+                to={`/author/${blog.authorId}`}
+                className="group block border border-black/10 bg-white p-6 transition duration-500 hover:-translate-y-1 hover:border-[#1f5c43]/30 hover:shadow-2xl dark:border-white/10 dark:bg-[#171c18]"
+              >
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#1f5c43]">
+                  Written by
+                </p>
+
+                <div className="mt-5 flex items-center gap-4">
+                  <img
+                    src={author?.avatar}
+                    alt={author?.name}
+                    className="h-14 w-14 rounded-full object-cover transition duration-300 group-hover:scale-110"
+                  />
 
                   <div>
-                    <h3 className="font-bold text-gray-900">
-                      {comment.name}
-                    </h3>
+                    <p className="text-base font-black text-gray-950 transition duration-300 group-hover:text-[#1f5c43] dark:text-white">
+                      {author?.name}
+                    </p>
 
-                    <p className="mt-1 text-xs text-gray-400">
-                      {comment.date}
+                    <p className="mt-1 text-xs text-gray-500">
+                      {author?.role}
+                    </p>
+                  </div>
+                </div>
+
+                <p className="mt-5 text-sm leading-6 text-gray-600 dark:text-gray-400">
+                  {author?.bio}
+                </p>
+
+                <p className="mt-5 text-sm font-black text-[#1f5c43] transition duration-300 group-hover:translate-x-1">
+                  View author profile →
+                </p>
+              </Link>
+
+              <BrandSignature />
+
+              <div className="border border-black/10 bg-white p-6 transition duration-500 hover:-translate-y-1 hover:shadow-xl dark:border-white/10 dark:bg-[#171c18]">
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#1f5c43]">
+                  About this story
+                </p>
+
+                <div className="mt-5 space-y-4">
+                  <div>
+                    <p className="text-xs text-gray-500">
+                      Published
+                    </p>
+
+                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-white">
+                      {blog.date}
                     </p>
                   </div>
 
-                  <button
-                    onClick={() =>
-                      deleteComment(
-                        blog.id,
-                        comment.id
-                      )
-                    }
-                    className="text-sm text-gray-400 hover:text-red-500"
-                  >
-                    Delete
-                  </button>
+                  <div>
+                    <p className="text-xs text-gray-500">
+                      Reading time
+                    </p>
 
+                    <p className="mt-1 text-sm font-bold text-gray-900 dark:text-white">
+                      {blog.readTime} minutes
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-xs text-gray-500">
+                      Category
+                    </p>
+
+                    <Link
+                      to={`/category/${blog.categorySlug}`}
+                      className="mt-1 inline-flex text-sm font-bold text-[#1f5c43] transition hover:translate-x-1 hover:underline"
+                    >
+                      {blog.category}
+                    </Link>
+                  </div>
                 </div>
-
-                <p className="mt-4 leading-7 text-gray-600">
-                  {comment.text}
-                </p>
-
               </div>
-
-            ))
-
-          )}
-
+            </div>
+          </aside>
         </div>
+      </article>
 
-      </section>
-
-      {/* Related Stories */}
-      <RelatedBlogs
-        blogs={relatedBlogs}
-      />
-
+      {relatedBlogs.length > 0 && (
+        <section className="mx-auto max-w-[1400px] px-6 pb-20 md:px-8">
+          <RelatedBlogs blogs={relatedBlogs} />
+        </section>
+      )}
     </main>
   )
 }

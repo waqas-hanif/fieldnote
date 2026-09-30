@@ -1,38 +1,80 @@
+
 export const categories = [
   {
     id: 1,
     name: "Technology",
     slug: "technology",
-    description: "Practical ideas about technology, AI and the digital world.",
+    description:
+      "Technology, artificial intelligence, software and digital change.",
   },
   {
     id: 2,
     name: "Agriculture",
     slug: "agriculture",
-    description: "Real-world insights about farming, crops and sustainability.",
+    description:
+      "Farming, crops, water, food systems and agricultural innovation.",
   },
   {
     id: 3,
-    name: "Development",
-    slug: "development",
-    description: "Lessons from building modern web applications.",
+    name: "Business",
+    slug: "business",
+    description:
+      "Business, companies, markets, entrepreneurship and the economy.",
   },
   {
     id: 4,
-    name: "Career",
-    slug: "career",
-    description: "Practical lessons for students and professionals.",
+    name: "Development",
+    slug: "development",
+    description:
+      "Software development, programming, web technologies and digital products.",
   },
   {
     id: 5,
-    name: "Business",
-    slug: "business",
-    description: "Ideas about entrepreneurship and modern businesses.",
+    name: "Career",
+    slug: "career",
+    description:
+      "Careers, education, workplace skills and professional growth.",
   },
   {
     id: 6,
     name: "Productivity",
     slug: "productivity",
-    description: "Simple systems for better work and better habits.",
+    description:
+      "Practical ideas for better work, planning, focus and everyday productivity.",
+  },
+  {
+    id: 7,
+    name: "World",
+    slug: "world",
+    description:
+      "Important international developments, global events and world affairs.",
+  },
+  {
+    id: 8,
+    name: "Pakistan",
+    slug: "pakistan",
+    description:
+      "News, developments and useful stories from Pakistan.",
+  },
+  {
+    id: 9,
+    name: "Science",
+    slug: "science",
+    description:
+      "Science, research, discoveries, health-related research and innovation.",
+  },
+  {
+    id: 10,
+    name: "Climate",
+    slug: "climate",
+    description:
+      "Climate, environment, sustainability and changing natural systems.",
+  },
+  {
+    id: 11,
+    name: "Sports",
+    slug: "sports",
+    description:
+      "Sports stories, major events, athletes and competitions.",
   },
 ]
